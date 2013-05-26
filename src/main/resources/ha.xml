@@ -1,0 +1,50 @@
+
+<!-- http://docs.jboss.org/jbossclustering/cluster_guide/5.1/html/jgroups.chapt.html 
+	http://www.jgroups.org/manual/html/index.html -->
+
+<config xmlns="urn:org:jgroups" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:org:jgroups http://www.jgroups.org/schema/JGroups-3.3.xsd">
+	<!-- <UDP mcast_port="${jgroups.udp.mcast_port:45588}" tos="8" /> <PING 
+		timeout="2000" num_initial_members="20" /> -->
+	<TCP bind_port="7800" bind_addr="localhost" />
+
+	<TCPPING initial_hosts="localhost[7800]" port_range="10" />
+
+	<!-- This is important to recify a split cluster as the result of a gc pause. 
+		Without it, there will be multiple coordinators -->
+	<MERGE3 min_interval="1000" max_interval="5000" />
+
+	<!-- Heartbeat every n period. Members are suspect after a timeout. -->
+	<FD_ALL interval="2500" timeout="2500" />
+
+	<!-- Use a ring of TCP sockets. Members are suspect when their TCP socket 
+		abnormally closes. -->
+	<FD_SOCK bind_addr="localhost" num_tries="2" />
+
+	<!-- Pings the suspect member one last time before declaring them offline -->
+	<VERIFY_SUSPECT timeout="1500" />
+
+	<!-- Provides reliable FIFO delivery for messages sent between nodes -->
+	<pbcast.NAKACK use_mcast_xmit="false" retransmit_timeout="300,600,1200,2400,4800"
+		discard_delivered_msgs="true" />
+
+
+	<!-- STABLE garbage collects messages that have been seen by all members 
+		of a cluster. Each member has to store all messages because it may be asked 
+		to retransmit. Only when we are sure that all members have seen a message 
+		can it be removed from the retransmission buffers. STABLE periodically gossips 
+		its highest and lowest messages seen. The lowest value is used to compute 
+		the min (all lowest seqnos for all members), and messages with a seqno below 
+		that min can safely be discarded. -->
+	<pbcast.STABLE stability_delay="1000" desired_avg_gossip="50000"
+		max_bytes="4M" />
+
+	<!-- Group membership protocol -->
+	<pbcast.GMS print_local_addr="true" join_timeout="3000"
+		view_bundling="true" />
+
+	<!-- Used to transfer byte[] between nodes <pbcast.STATE_TRANSFER /> -->
+
+	<!-- The distributed lock is on a centralised node -->
+	<CENTRAL_LOCK />
+</config>
