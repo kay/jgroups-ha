@@ -12,8 +12,11 @@ import org.slf4j.LoggerFactory;
  * Resolves who will be leader through the use of a distributed lock.
  * 
  * Should not be called from multiple threads at once (not thread safe).
+ * 
+ * @author doug@neverfear.org
  */
-class LeadershipResolver {
+final class LeadershipResolver {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(LeadershipResolver.class);
 	private static final String LOCK_NAME_FORMAT = "ha-%s";
 
@@ -57,6 +60,12 @@ class LeadershipResolver {
 		return this.leader.get();
 	}
 
+	/**
+	 * There's an assumption here that the caller is always coming from the same
+	 * thread. Otherwise leader=false could overtake a prior leader=true.
+	 * 
+	 * @param leader
+	 */
 	private void setLeader(final boolean leader) {
 		if (leader) {
 			if (this.leader.compareAndSet(false, true)) {

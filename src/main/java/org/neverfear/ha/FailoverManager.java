@@ -13,7 +13,14 @@ import org.jgroups.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FailoverManager implements AutoCloseable, ChannelListener, Receiver {
+/**
+ * 
+ * @author doug@neverfear.org
+ * 
+ */
+public final class FailoverManager
+	implements AutoCloseable, ChannelListener, Receiver {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(FailoverManager.class);
 
 	private static final String HA_CLUSTER = "ha-cluster";
@@ -55,7 +62,7 @@ public class FailoverManager implements AutoCloseable, ChannelListener, Receiver
 	}
 
 	@Override
-	public void viewAccepted(final View newView) {
+	public synchronized void viewAccepted(final View newView) {
 		LOGGER.info("View accepted {}", newView);
 
 		if (isMajority(newView.getMembers().size())) {

@@ -35,11 +35,13 @@ public class Main {
 					// Boot up
 					// Initialise data
 					// Begin processing
+					System.out.println(Thread.currentThread().getName() + ": Leadership acquired");
 				}
 
 				@Override
 				public void onRelinquished() {
 					// Typically caused by the loss of consensus
+					System.out.println(Thread.currentThread().getName() + ": Leadership relinquished");
 				}
 			});) {
 
